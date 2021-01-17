@@ -7,6 +7,7 @@ using Blog.Core.Common;
 using Blog.Core.Common.AppConfig;
 using Blog.Core.Common.DB;
 using Blog.Core.Common.LogHelper;
+using Blog.Core.Extensions;
 using Blog.Core.IRepository.Base;
 using Blog.Core.IServices;
 using Blog.Core.Model.Seed;
@@ -117,7 +118,8 @@ namespace Blog.Core.Tests
             services.AddSingleton(new LogLock(basePath));
             services.AddScoped<DBSeed>();
             services.AddScoped<MyContext>();
-
+            services.AddLogging();
+            services.AddAutoMapperSetup();
             //读取配置文件
             var symmetricKeyAsBase64 = AppSecretConfig.Audience_Secret_String;
             var keyByteArray = Encoding.ASCII.GetBytes(symmetricKeyAsBase64);
