@@ -109,6 +109,26 @@ namespace Blog.Core.Extensions
                     ConsoleHelper.WriteSuccessLine($"IpRateLimiting: True");
                 }
 
+                // 性能分析
+                if (!Appsettings.app("Startup", "MiniProfiler", "Enabled").ObjToBool())
+                {
+                    Console.WriteLine($"MiniProfiler: False");
+                }
+                else
+                {
+                    ConsoleHelper.WriteSuccessLine($"MiniProfiler: True");
+                }
+              
+                // CORS跨域
+                if (!Appsettings.app("Startup", "Cors", "EnableAllIPs").ObjToBool())
+                {
+                    Console.WriteLine($"EnableAllIPs For CORS: False");
+                }
+                else
+                {
+                    ConsoleHelper.WriteSuccessLine($"EnableAllIPs For CORS: True");
+                }
+
                 // redis消息队列
                 if (!Appsettings.app("Startup", "RedisMq", "Enabled").ObjToBool())
                 {
@@ -127,6 +147,16 @@ namespace Blog.Core.Extensions
                 else
                 {
                     ConsoleHelper.WriteSuccessLine($"RabbitMQ: True");
+                }
+
+                // Consul 注册服务
+                if (!Appsettings.app("Middleware", "Consul", "Enabled").ObjToBool())
+                {
+                    Console.WriteLine($"Consul service: False");
+                }
+                else
+                {
+                    ConsoleHelper.WriteSuccessLine($"Consul service: True");
                 }
 
                 // EventBus 事件总线
