@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Blog.Core.Controllers
 {
     /// <summary>
-    /// 菜单管理
+    /// 菜单管理（包含按钮）
     /// </summary>
     [Route("api/[controller]/[action]")]
     [ApiController]
@@ -143,7 +143,7 @@ namespace Blog.Core.Controllers
         }
 
         /// <summary>
-        /// 查询树形 Table
+        /// 查询树形 Table(操作菜单，看菜单)
         /// </summary>
         /// <param name="f">父节点</param>
         /// <param name="key">关键字</param>
@@ -232,7 +232,7 @@ namespace Blog.Core.Controllers
         }
 
         /// <summary>
-        /// 保存菜单权限分配
+        /// 给角色绑定菜单权限分配
         /// </summary>
         /// <param name="assignView"></param>
         /// <returns></returns>
@@ -289,7 +289,7 @@ namespace Blog.Core.Controllers
 
 
         /// <summary>
-        /// 获取菜单树
+        /// 获取菜单树（权限分配，要查询出来），（包含按钮）
         /// </summary>
         /// <param name="pid"></param>
         /// <param name="needbtn"></param>
@@ -334,7 +334,7 @@ namespace Blog.Core.Controllers
         }
 
         /// <summary>
-        /// 获取路由树
+        /// 获取路由树（登录时获取左侧菜单，里面也包含按钮）
         /// </summary>
         /// <param name="uid"></param>
         /// <returns></returns>
@@ -426,7 +426,7 @@ namespace Blog.Core.Controllers
         }
 
         /// <summary>
-        /// 通过角色获取菜单【无权限】
+        /// 通过角色获取菜单上绑定的按钮
         /// </summary>
         /// <param name="rid"></param>
         /// <returns></returns>

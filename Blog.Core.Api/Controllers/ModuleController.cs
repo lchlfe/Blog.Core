@@ -21,7 +21,7 @@ namespace Blog.Core.Controllers
         readonly IModuleServices _moduleServices;
         readonly IUser _user;
 
-       
+
         public ModuleController(IModuleServices moduleServices, IUser user)
         {
             _moduleServices = moduleServices;
