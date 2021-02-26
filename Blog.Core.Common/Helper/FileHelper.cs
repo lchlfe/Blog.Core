@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Blog.Core.Common.Helper
 {
+    /// <summary>
+    /// 文件帮助
+    /// </summary>
     public class FileHelper : IDisposable
     {
 

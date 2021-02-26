@@ -2,6 +2,9 @@
 
 namespace Blog.Core.Common.Helper
 {
+    /// <summary>
+    /// 控制到台打印信息
+    /// </summary>
     public static class ConsoleHelper
     {
         static void WriteColorLine(string str, ConsoleColor color)

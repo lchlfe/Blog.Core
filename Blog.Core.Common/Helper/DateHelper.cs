@@ -2,6 +2,9 @@
 
 namespace Blog.Core.Common.Helper
 {
+    /// <summary>
+    /// 时间帮助
+    /// </summary>
     public class DateHelper
     {
         public static DateTime StampToDateTime(string time)

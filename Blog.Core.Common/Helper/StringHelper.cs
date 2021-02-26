@@ -6,6 +6,9 @@ using System.Text;
 
 namespace Blog.Core.Common.Helper
 {
+    /// <summary>
+    /// 字符串帮助类
+    /// </summary>
     public class StringHelper
     {
         /// <summary>

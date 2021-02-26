@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace Blog.Core.Common.Helper
 {
+    /// <summary>
+    /// http请求
+    /// </summary>
     public class HttpHelper
     {
         public static string Get(string serviceAddress)

@@ -4,6 +4,9 @@ using System.Text.Json;
 
 namespace Blog.Core.Common.Helper
 {
+    /// <summary>
+    /// json数据的序列化和反序列化
+    /// </summary>
     public class JsonHelper
     {
         /// <summary>

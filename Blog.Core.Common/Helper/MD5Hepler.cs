@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Blog.Core.Common.Helper
 {
+    /// <summary>
+    /// MD5加密
+    /// </summary>
     public class MD5Helper
     {
         /// <summary>

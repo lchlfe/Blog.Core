@@ -3,6 +3,9 @@ using System.Text;
 
 namespace Blog.Core.Common
 {
+    /// <summary>
+    /// 对象序列化，反序列化
+    /// </summary>
     public class SerializeHelper
     {
         /// <summary>

@@ -2,6 +2,9 @@
 
 namespace Blog.Core.Common.AppConfig
 {
+    /// <summary>
+    /// 读取密钥，如果文件有值就读取文件，否正读取配置文件
+    /// </summary>
     public class AppSecretConfig
     {
         private static string Audience_Secret = Appsettings.app(new string[] { "Audience", "Secret" });

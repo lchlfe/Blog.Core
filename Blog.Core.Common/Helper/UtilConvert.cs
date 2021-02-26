@@ -2,7 +2,7 @@
 namespace Blog.Core
 {
     /// <summary>
-    /// 
+    /// 值转换
     /// </summary>
     public static class UtilConvert
     {
