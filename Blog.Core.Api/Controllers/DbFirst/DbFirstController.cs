@@ -1,7 +1,7 @@
 ﻿using Blog.Core.Common;
 using Blog.Core.Common.DB;
+using Blog.Core.Common.Seed;
 using Blog.Core.Model;
-using Blog.Core.Model.Seed;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
@@ -15,7 +15,7 @@ namespace Blog.Core.Controllers
     //[Authorize(Permissions.Name)]
     public class DbFirstController : ControllerBase
     {
-        private readonly SqlSugarClient _sqlSugarClient;
+        private readonly SqlSugarScope _sqlSugarClient;
         private readonly IWebHostEnvironment Env;
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace Blog.Core.Controllers
         /// </summary>
         public DbFirstController(ISqlSugarClient sqlSugarClient, IWebHostEnvironment env)
         {
-            _sqlSugarClient = sqlSugarClient as SqlSugarClient;
+            _sqlSugarClient = sqlSugarClient as SqlSugarScope;
             Env = env;
         }
 
@@ -36,7 +36,7 @@ namespace Blog.Core.Controllers
         {
             var data = new MessageModel<string>() { success = true, msg = "" };
             data.response += @"file path is:C:\my-file\}";
-            var isMuti = Appsettings.app(new string[] { "MutiDBEnabled" }).ObjToBool();
+            var isMuti = AppSettings.app(new string[] { "MutiDBEnabled" }).ObjToBool();
             if (Env.IsDevelopment())
             {
                 data.response += $"Controller层生成：{FrameSeed.CreateControllers(_sqlSugarClient)} || ";
@@ -74,7 +74,7 @@ namespace Blog.Core.Controllers
         {
             ConnID = ConnID == null ? MainDb.CurrentDbConnId.ToLower() : ConnID;
 
-            var isMuti = Appsettings.app(new string[] { "MutiDBEnabled" }).ObjToBool();
+            var isMuti = AppSettings.app(new string[] { "MutiDBEnabled" }).ObjToBool();
             var data = new MessageModel<string>() { success = true, msg = "" };
             if (Env.IsDevelopment())
             {
@@ -102,7 +102,7 @@ namespace Blog.Core.Controllers
         {
             ConnID = ConnID == null ? MainDb.CurrentDbConnId.ToLower() : ConnID;
 
-            var isMuti = Appsettings.app(new string[] { "MutiDBEnabled" }).ObjToBool();
+            var isMuti = AppSettings.app(new string[] { "MutiDBEnabled" }).ObjToBool();
             var data = new MessageModel<string>() { success = true, msg = "" };
             if (Env.IsDevelopment())
             {
@@ -126,7 +126,7 @@ namespace Blog.Core.Controllers
         {
             ConnID = ConnID == null ? MainDb.CurrentDbConnId.ToLower() : ConnID;
 
-            var isMuti = Appsettings.app(new string[] { "MutiDBEnabled" }).ObjToBool();
+            var isMuti = AppSettings.app(new string[] { "MutiDBEnabled" }).ObjToBool();
             var data = new MessageModel<string>() { success = true, msg = "" };
             if (Env.IsDevelopment())
             {
@@ -151,7 +151,7 @@ namespace Blog.Core.Controllers
         {
             ConnID = ConnID == null ? MainDb.CurrentDbConnId.ToLower() : ConnID;
 
-            var isMuti = Appsettings.app(new string[] { "MutiDBEnabled" }).ObjToBool();
+            var isMuti = AppSettings.app(new string[] { "MutiDBEnabled" }).ObjToBool();
             var data = new MessageModel<string>() { success = true, msg = "" };
             if (Env.IsDevelopment())
             {
