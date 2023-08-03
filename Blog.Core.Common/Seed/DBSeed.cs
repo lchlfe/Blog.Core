@@ -8,11 +8,13 @@ using Newtonsoft.Json;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Blog.Core.Common.Const;
 
 namespace Blog.Core.Common.Seed
 {
@@ -42,9 +44,9 @@ namespace Blog.Core.Common.Seed
                 Console.WriteLine($"Is multi-DataBase: {AppSettings.app(new string[] { "MutiDBEnabled" })}");
                 Console.WriteLine($"Is CQRS: {AppSettings.app(new string[] { "CQRSEnabled" })}");
                 Console.WriteLine();
-                Console.WriteLine($"Master DB ConId: {MyContext.ConnId}");
-                Console.WriteLine($"Master DB Type: {MyContext.DbType}");
-                Console.WriteLine($"Master DB ConnectString: {MyContext.ConnectionString}");
+                Console.WriteLine($"Master DB ConId: {myContext.Db.CurrentConnectionConfig.ConfigId}");
+                Console.WriteLine($"Master DB Type: {myContext.Db.CurrentConnectionConfig.DbType}");
+                Console.WriteLine($"Master DB ConnectString: {myContext.Db.CurrentConnectionConfig.ConnectionString}");
                 Console.WriteLine();
                 if (AppSettings.app(new string[] { "MutiDBEnabled" }).ObjToBool())
                 {
@@ -79,7 +81,7 @@ namespace Blog.Core.Common.Seed
                 // 创建数据库
                 Console.WriteLine($"Create Database(The Db Id:{MyContext.ConnId})...");
 
-                if (MyContext.DbType != SqlSugar.DbType.Oracle)
+                if (MyContext.DbType != SqlSugar.DbType.Oracle && MyContext.DbType != SqlSugar.DbType.Dm)
                 {
                     myContext.Db.DbMaintenance.CreateDatabase();
                     ConsoleHelper.WriteSuccessLine($"Database created successfully!");
@@ -87,7 +89,7 @@ namespace Blog.Core.Common.Seed
                 else
                 {
                     //Oracle 数据库不支持该操作
-                    ConsoleHelper.WriteSuccessLine($"Oracle 数据库不支持该操作，可手动创建Oracle数据库!");
+                    ConsoleHelper.WriteSuccessLine($"Oracle 数据库不支持该操作，可手动创建Oracle/Dm数据库!");
                 }
 
                 // 创建数据库表，遍历指定命名空间下的class，
@@ -109,7 +111,7 @@ namespace Blog.Core.Common.Seed
                     if (!myContext.Db.DbMaintenance.IsAnyTable(t.Name))
                     {
                         Console.WriteLine(t.Name);
-                        myContext.Db.CodeFirst.InitTables(t);
+                        myContext.Db.CodeFirst.SplitTables().InitTables(t);
                     }
                 });
                 ConsoleHelper.WriteSuccessLine($"Tables created successfully!");
@@ -175,7 +177,11 @@ namespace Blog.Core.Common.Seed
                     {
                         var data = JsonConvert.DeserializeObject<List<Permission>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "Permission"), Encoding.UTF8), setting);
 
-                        myContext.GetEntityDB<Permission>().InsertRange(data);
+                        foreach (var item in data)
+                        {
+                            Console.WriteLine($"{item.Name}:{item.Id}");
+                            myContext.GetEntityDB<Permission>().Insert(item);
+                        }
                         Console.WriteLine("Table:Permission created success!");
                     }
                     else
@@ -190,10 +196,10 @@ namespace Blog.Core.Common.Seed
 
                     if (!await myContext.Db.Queryable<Role>().AnyAsync())
                     {
-                        //var data = JsonConvert.DeserializeObject<List<Role>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "Role"), Encoding.UTF8), setting);
-                        using var stream = new FileStream(Path.Combine(WebRootPath, "BlogCore.Data.excel", "Role.xlsx"), FileMode.Open);
-                        var result = await importer.Import<Role>(stream);
-                        var data = result.Data.ToList();
+                        var data = JsonConvert.DeserializeObject<List<Role>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "Role"), Encoding.UTF8), setting);
+                        //using var stream = new FileStream(Path.Combine(WebRootPath, "BlogCore.Data.excel", "Role.xlsx"), FileMode.Open);
+                        //var result = await importer.Import<Role>(stream);
+                        //var data = result.Data.ToList();
 
                         myContext.GetEntityDB<Role>().InsertRange(data);
                         Console.WriteLine("Table:Role created success!");
@@ -212,7 +218,11 @@ namespace Blog.Core.Common.Seed
                     {
                         var data = JsonConvert.DeserializeObject<List<RoleModulePermission>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "RoleModulePermission"), Encoding.UTF8), setting);
 
-                        myContext.GetEntityDB<RoleModulePermission>().InsertRange(data);
+                        foreach (var item in data)
+                        {
+                            Console.WriteLine($"{item.Id}");
+                            myContext.GetEntityDB<RoleModulePermission>().Insert(item);
+                        }
                         Console.WriteLine("Table:RoleModulePermission created success!");
                     }
                     else
@@ -261,10 +271,7 @@ namespace Blog.Core.Common.Seed
 
                     if (!await myContext.Db.Queryable<UserRole>().AnyAsync())
                     {
-                        //var data = JsonConvert.DeserializeObject<List<UserRole>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "UserRole"), Encoding.UTF8), setting);
-                        using var stream = new FileStream(Path.Combine(WebRootPath, "BlogCore.Data.excel", "UserRole.xlsx"), FileMode.Open);
-                        var result = await importer.Import<UserRole>(stream);
-                        var data = result.Data.ToList();
+                        var data = JsonConvert.DeserializeObject<List<UserRole>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "UserRole"), Encoding.UTF8), setting);
 
                         myContext.GetEntityDB<UserRole>().InsertRange(data);
                         Console.WriteLine("Table:UserRole created success!");
@@ -281,10 +288,7 @@ namespace Blog.Core.Common.Seed
 
                     if (!await myContext.Db.Queryable<SysUserInfo>().AnyAsync())
                     {
-                        //var data = JsonConvert.DeserializeObject<List<SysUserInfo>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "sysUserInfo"), Encoding.UTF8), setting);
-                        using var stream = new FileStream(Path.Combine(WebRootPath, "BlogCore.Data.excel", "SysUserInfo.xlsx"), FileMode.Open);
-                        var result = await importer.Import<SysUserInfo>(stream);
-                        var data = result.Data.ToList();
+                        var data = JsonConvert.DeserializeObject<List<SysUserInfo>>(FileHelper.ReadFile(string.Format(SeedDataFolder, "sysUserInfo"), Encoding.UTF8), setting);
 
                         myContext.GetEntityDB<SysUserInfo>().InsertRange(data);
                         Console.WriteLine("Table:sysUserInfo created success!");
@@ -426,6 +430,58 @@ namespace Blog.Core.Common.Seed
             }
         }
 
+        /// <summary>
+        /// 迁移日志数据库
+        /// </summary>
+        /// <returns></returns>
+        public static void MigrationLogs(MyContext myContext)
+        {
+            // 创建数据库表，遍历指定命名空间下的class，
+            // 注意不要把其他命名空间下的也添加进来。
+            Console.WriteLine("Create Log Tables...");
+            if (!myContext.Db.IsAnyConnection(SqlSugarConst.LogConfigId.ToLower()))
+            {
+                throw new ApplicationException("未配置日志数据库，请在appsettings.json中DBS节点中配置");
+            }
+
+            var logDb = myContext.Db.GetConnection(SqlSugarConst.LogConfigId.ToLower());
+            Console.WriteLine($"Create log Database(The Db Id:{SqlSugarConst.LogConfigId.ToLower()})...");
+            logDb.DbMaintenance.CreateDatabase();
+            ConsoleHelper.WriteSuccessLine($"Log Database created successfully!");
+            var path = AppDomain.CurrentDomain.RelativeSearchPath ?? AppDomain.CurrentDomain.BaseDirectory;
+            var referencedAssemblies = System.IO.Directory.GetFiles(path, "Blog.Core.Model.dll").Select(Assembly.LoadFrom).ToArray();
+            var modelTypes = referencedAssemblies
+                .SelectMany(a => a.DefinedTypes)
+                .Select(type => type.AsType())
+                .Where(x => x.IsClass && x.Namespace != null && x.Namespace.StartsWith("Blog.Core.Model.Logs")).ToList();
+            Stopwatch sw = Stopwatch.StartNew();
+
+            var tables = logDb.DbMaintenance.GetTableInfoList();
+
+            modelTypes.ForEach(t =>
+            {
+                // 这里只支持添加修改表，不支持删除
+                // 如果想要删除，数据库直接右键删除，或者联系SqlSugar作者；
+                if (!tables.Any(s => s.Name.Contains(t.Name)))
+                {
+                    Console.WriteLine(t.Name);
+                    if (t.GetCustomAttribute<SplitTableAttribute>() != null)
+                    {
+                        logDb.CodeFirst.SplitTables().InitTables(t);
+                    }
+                    else
+                    {
+                        logDb.CodeFirst.InitTables(t);
+                    }
+                }
+            });
+
+            sw.Stop();
+
+            $"Log Tables created successfully! {sw.ElapsedMilliseconds}ms".WriteSuccessLine();
+            Console.WriteLine();
+        }
+
 
         /// <summary>
         /// 初始化 多租户
@@ -523,6 +579,8 @@ namespace Blog.Core.Common.Seed
 
         #endregion
 
+        #region 多租户 种子数据 初始化
+
         private static async Task TenantSeedDataAsync(ISqlSugarClient db, TenantTypeEnum tenantType)
         {
             // 获取所有种子配置-初始化数据
@@ -578,5 +636,7 @@ namespace Blog.Core.Common.Seed
                 }
             }
         }
+
+        #endregion
     }
 }
