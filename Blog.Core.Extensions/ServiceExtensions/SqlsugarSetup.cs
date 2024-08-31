@@ -2,19 +2,12 @@
 using Blog.Core.Common.Const;
 using Blog.Core.Common.DB;
 using Blog.Core.Common.DB.Aop;
-using Blog.Core.Common.LogHelper;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using SqlSugar;
-using StackExchange.Profiling;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Blog.Core.Common.Caches;
-using Blog.Core.Common.Core;
-using Blog.Core.Common.HttpContextUser;
-using static Grpc.Core.ChannelOption;
 using System.Text.RegularExpressions;
+using Blog.Core.Common.Utility;
 
 namespace Blog.Core.Extensions
 {
@@ -29,17 +22,13 @@ namespace Blog.Core.Extensions
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
 
-            // 默认添加主数据库连接
-            MainDb.CurrentDbConnId = AppSettings.app(new string[] { "MainDB" });
+            StaticConfig.CustomSnowFlakeFunc = IdGeneratorUtility.NextId;
 
-            BaseDBConfig.MutiConnectionString.slaveDbs.ForEach(s =>
+            // 默认添加主数据库连接
+            if (!AppSettings.app("MainDB").IsNullOrEmpty())
             {
-                BaseDBConfig.AllSlaveConfigs.Add(new SlaveConnectionConfig()
-                {
-                    HitRate = s.HitRate,
-                    ConnectionString = s.Connection
-                });
-            });
+                MainDb.CurrentDbConnId = AppSettings.app("MainDB");
+            }
 
             BaseDBConfig.MutiConnectionString.allDbs.ForEach(m =>
             {
@@ -47,7 +36,7 @@ namespace Blog.Core.Extensions
                 {
                     ConfigId = m.ConnId.ObjToString().ToLower(),
                     ConnectionString = m.Connection,
-                    DbType = (DbType)m.DbType,
+                    DbType = (DbType) m.DbType,
                     IsAutoCloseConnection = true,
                     // Check out more information: https://github.com/anjoy8/Blog.Core/issues/122
                     //IsShardSameThread = false,
@@ -58,7 +47,11 @@ namespace Blog.Core.Extensions
                         SqlServerCodeFirstNvarchar = true,
                     },
                     // 从库
-                    SlaveConnectionConfigs = BaseDBConfig.AllSlaveConfigs,
+                    SlaveConnectionConfigs = m.Slaves?.Where(s => s.HitRate > 0).Select(s => new SlaveConnectionConfig
+                    {
+                        ConnectionString = s.Connection,
+                        HitRate = s.HitRate
+                    }).ToList(),
                     // 自定义特性
                     ConfigureExternalServices = new ConfigureExternalServices()
                     {
@@ -79,6 +72,18 @@ namespace Blog.Core.Extensions
                 }
                 else
                 {
+                    if (string.Equals(config.ConfigId.ToString(), MainDb.CurrentDbConnId,
+                            StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        BaseDBConfig.MainConfig = config;
+                    }
+                    else if (m.ConnId.ToLower().StartsWith(MainDb.CurrentDbConnId.ToLower()))
+                    {
+                        //复用连接
+                        BaseDBConfig.ReuseConfigs.Add(config);
+                    }
+
+
                     BaseDBConfig.ValidConfig.Add(config);
                 }
 
@@ -98,12 +103,14 @@ namespace Blog.Core.Extensions
                 {
                     BaseDBConfig.ValidConfig.ForEach(config =>
                     {
-                        var dbProvider = db.GetConnectionScope((string)config.ConfigId);
+                        var dbProvider = db.GetConnectionScope((string) config.ConfigId);
 
                         // 打印SQL语句
                         dbProvider.Aop.OnLogExecuting = (s, parameters) =>
                         {
-                            SqlSugarAop.OnLogExecuting(dbProvider, App.User?.Name.ObjToString(), ExtractTableName(s), Enum.GetName(typeof(SugarActionType), dbProvider.SugarActionType), s, parameters, config);
+                            SqlSugarAop.OnLogExecuting(dbProvider, App.User?.Name.ObjToString(), ExtractTableName(s),
+                                Enum.GetName(typeof(SugarActionType), dbProvider.SugarActionType), s, parameters,
+                                config);
                         };
 
                         // 数据审计
@@ -114,8 +121,11 @@ namespace Blog.Core.Extensions
                         // 配置实体数据权限
                         RepositorySetting.SetTenantEntityFilter(dbProvider);
                     });
+                    //故障转移,检查主库链接自动切换备用连接
+                    SqlSugarReuse.AutoChangeAvailableConnect(db);
                 });
             });
+            services.AddTransient<SqlSugarScope>(s => s.GetService<ISqlSugarClient>() as SqlSugarScope);
         }
 
         private static string GetWholeSql(SugarParameter[] paramArr, string sql)

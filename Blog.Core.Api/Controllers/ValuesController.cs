@@ -3,7 +3,6 @@ using Blog.Core.Common;
 using Blog.Core.Common.HttpContextUser;
 using Blog.Core.Common.Https.HttpPolly;
 using Blog.Core.Common.Option;
-using Blog.Core.Common.WebApiClients.HttpApis;
 using Blog.Core.EventBus;
 using Blog.Core.EventBus.EventHandling;
 using Blog.Core.Extensions;
@@ -15,8 +14,13 @@ using Blog.Core.Model.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
+using System.Text;
+using Blog.Core.Common.Caches.Interface;
+using Blog.Core.Common.Utility;
 
 namespace Blog.Core.Controllers
 {
@@ -38,35 +42,15 @@ namespace Blog.Core.Controllers
         private readonly IRoleModulePermissionServices _roleModulePermissionServices;
         private readonly IUser _user;
         private readonly IPasswordLibServices _passwordLibServices;
-        private readonly IBlogApi _blogApi;
-        private readonly IDoubanApi _doubanApi;
         readonly IBlogArticleServices _blogArticleServices;
         private readonly IHttpPollyHelper _httpPollyHelper;
+        private readonly IRabbitMQPersistentConnection _persistentConnection;
         private readonly SeqOptions _seqOptions;
+        private readonly ICaching _cache;
 
-        /// <summary>
-        /// ValuesController
-        /// </summary>
-        /// <param name="blogArticleServices"></param>
-        /// <param name="mapper"></param>
-        /// <param name="advertisementServices"></param>
-        /// <param name="love"></param>
-        /// <param name="roleModulePermissionServices"></param>
-        /// <param name="user"></param>
-        /// <param name="passwordLibServices"></param>
-        /// <param name="blogApi"></param>
-        /// <param name="doubanApi"></param>
-        /// <param name="httpPollyHelper"></param>
-        public ValuesController(IBlogArticleServices blogArticleServices
-            , IMapper mapper
-            , IAdvertisementServices advertisementServices
-            , Love love
-            , IRoleModulePermissionServices roleModulePermissionServices
-            , IUser user, IPasswordLibServices passwordLibServices
-            , IBlogApi blogApi
-            , IDoubanApi doubanApi
-            , IHttpPollyHelper httpPollyHelper
-            , IOptions<SeqOptions> seqOptions)
+        public ValuesController(IBlogArticleServices blogArticleServices, IMapper mapper, IAdvertisementServices advertisementServices, Love love,
+            IRoleModulePermissionServices roleModulePermissionServices, IUser user, IPasswordLibServices passwordLibServices,
+            IHttpPollyHelper httpPollyHelper, IRabbitMQPersistentConnection persistentConnection, IOptions<SeqOptions> seqOptions, ICaching caching)
         {
             // 测试 Authorize 和 mapper
             _mapper = mapper;
@@ -77,16 +61,54 @@ namespace Blog.Core.Controllers
             _user = user;
             // 测试多库
             _passwordLibServices = passwordLibServices;
-            // 测试http请求
-            _blogApi = blogApi;
-            _doubanApi = doubanApi;
             // 测试AOP加载顺序，配合 return
             _blogArticleServices = blogArticleServices;
             // 测试redis消息队列
             _blogArticleServices = blogArticleServices;
             // httpPolly
             _httpPollyHelper = httpPollyHelper;
+            _persistentConnection = persistentConnection;
+            _cache = caching;
             _seqOptions = seqOptions.Value;
+        }
+
+        /// <summary>
+        /// 测试Rabbit消息队列发送
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult TestRabbitMqPublish()
+        {
+            if (!_persistentConnection.IsConnected)
+            {
+                _persistentConnection.TryConnect();
+            }
+
+            _persistentConnection.PublishMessage("Hello, RabbitMQ!", exchangeName: "blogcore", routingKey: "myRoutingKey");
+            return Ok();
+        }
+
+        /// <summary>
+        /// 测试Rabbit消息队列订阅
+        /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult TestRabbitMqSubscribe()
+        {
+            if (!_persistentConnection.IsConnected)
+            {
+                _persistentConnection.TryConnect();
+            }
+
+            _persistentConnection.StartConsuming("myQueue");
+            return Ok();
+        }
+
+        private async Task<bool> Dealer(string exchange, string routingKey, byte[] msgBody, IDictionary<string, object> headers)
+        {
+            await Task.CompletedTask;
+            Console.WriteLine("我是消费者，这里消费了一条信息是：" + Encoding.UTF8.GetString(msgBody));
+            return true;
         }
 
         [HttpGet]
@@ -140,18 +162,18 @@ namespace Blog.Core.Controllers
              *  测试按照指定列查询
              */
             var queryByColums = await _blogArticleServices
-                .Query<BlogViewModels>(it => new BlogViewModels() { btitle = it.btitle });
+               .Query<BlogViewModels>(it => new BlogViewModels() { btitle = it.btitle });
 
             /*
-            *  测试按照指定列查询带多条件和排序方法
-            */
+             *  测试按照指定列查询带多条件和排序方法
+             */
             Expression<Func<BlogArticle, bool>> registerInfoWhere = a => a.btitle == "xxx" && a.bRemark == "XXX";
             var queryByColumsByMultiTerms = await _blogArticleServices
-                .Query<BlogArticle>(it => new BlogArticle() { btitle = it.btitle }, registerInfoWhere, "bID Desc");
+               .Query<BlogArticle>(it => new BlogArticle() { btitle = it.btitle }, registerInfoWhere, "bID Desc");
 
             /*
              *  测试 sql 更新
-             * 
+             *
              * 【SQL参数】：@bID:5
              *  @bsubmitter:laozhang619
              *  @IsDeleted:False
@@ -159,12 +181,7 @@ namespace Blog.Core.Controllers
              *  `bsubmitter`=@bsubmitter,`IsDeleted`=@IsDeleted  WHERE `bID`=@bID
              */
             var updateSql = await _blogArticleServices.Update(new
-            { bsubmitter = $"laozhang{DateTime.Now.Millisecond}", IsDeleted = false, bID = 5 });
-
-
-            // 测试模拟异常，全局异常过滤器拦截
-            var i = 0;
-            // var d = 3 / i;
+                { bsubmitter = $"laozhang{DateTime.Now.Millisecond}", IsDeleted = false, bID = 5 });
 
 
             // 测试 AOP 缓存
@@ -240,7 +257,6 @@ namespace Blog.Core.Controllers
         // GET api/values/5
         [HttpGet("{id}")]
         [AllowAnonymous]
-        //[TypeFilter(typeof(DeleteSubscriptionCache),Arguments =new object[] { "1"})]
         [TypeFilter(typeof(UseServiceDIAttribute), Arguments = new object[] { "laozhang" })]
         public ActionResult<string> Get(int id)
         {
@@ -352,20 +368,6 @@ namespace Blog.Core.Controllers
         }
 
         /// <summary>
-        /// 测试http请求 WebApiClient Get
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("WebApiClientGetAsync")]
-        [AllowAnonymous]
-        public async Task<object> WebApiClientGetAsync()
-        {
-            int id = 1;
-            string isbn = "9787544270878";
-            var doubanVideoDetail = await _doubanApi.VideoDetailAsync(isbn);
-            return await _blogApi.DetailNuxtNoPerAsync(id);
-        }
-
-        /// <summary>
         /// 测试Fulent做参数校验
         /// </summary>
         /// <param name="param"></param>
@@ -455,6 +457,42 @@ namespace Blog.Core.Controllers
         public string TestOption()
         {
             return _seqOptions.ToJson();
+        }
+
+        /// <summary>
+        /// 获取雪花Id
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [AllowAnonymous]
+        public long GetSnowflakeId()
+        {
+            return IdGeneratorUtility.NextId();
+        }
+
+        /// <summary>
+        /// 测试缓存
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<MessageModel<string>> TestCacheAsync()
+        {
+            await _cache.SetAsync("test", "test", new TimeSpan(0, 10, 0));
+
+            var result = await _cache.GetAsync<string>("test");
+            if (!"test".Equals(result))
+            {
+                return Failed("缓存失败,值不一样");
+            }
+
+            var count = _cache.GetAllCacheKeys().Count;
+            if (count <= 0)
+            {
+                return Failed("缓存失败,数量不对");
+            }
+
+            return Success<string>("");
         }
     }
 

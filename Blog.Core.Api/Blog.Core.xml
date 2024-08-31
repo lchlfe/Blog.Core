@@ -186,6 +186,7 @@
             <param name="roleServices"></param>
             <param name="requirement"></param>
             <param name="roleModulePermissionServices"></param>
+            <param name="logger"></param>
         </member>
         <member name="M:Blog.Core.Controllers.LoginController.GetJwtStr(System.String,System.String)">
             <summary>
@@ -757,20 +758,15 @@
             Values控制器
             </summary>
         </member>
-        <member name="M:Blog.Core.Controllers.ValuesController.#ctor(Blog.Core.IServices.IBlogArticleServices,AutoMapper.IMapper,Blog.Core.IServices.IAdvertisementServices,Blog.Core.Model.Love,Blog.Core.IServices.IRoleModulePermissionServices,Blog.Core.Common.HttpContextUser.IUser,Blog.Core.IServices.IPasswordLibServices,Blog.Core.Common.WebApiClients.HttpApis.IBlogApi,Blog.Core.Common.WebApiClients.HttpApis.IDoubanApi,Blog.Core.Common.Https.HttpPolly.IHttpPollyHelper,Microsoft.Extensions.Options.IOptions{Blog.Core.Common.Option.SeqOptions})">
+        <member name="M:Blog.Core.Controllers.ValuesController.TestRabbitMqPublish">
             <summary>
-            ValuesController
+            测试Rabbit消息队列发送
             </summary>
-            <param name="blogArticleServices"></param>
-            <param name="mapper"></param>
-            <param name="advertisementServices"></param>
-            <param name="love"></param>
-            <param name="roleModulePermissionServices"></param>
-            <param name="user"></param>
-            <param name="passwordLibServices"></param>
-            <param name="blogApi"></param>
-            <param name="doubanApi"></param>
-            <param name="httpPollyHelper"></param>
+        </member>
+        <member name="M:Blog.Core.Controllers.ValuesController.TestRabbitMqSubscribe">
+            <summary>
+            测试Rabbit消息队列订阅
+            </summary>
         </member>
         <member name="M:Blog.Core.Controllers.ValuesController.TestSqlsugarWithCache">
             <summary>
@@ -853,12 +849,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:Blog.Core.Controllers.ValuesController.WebApiClientGetAsync">
-            <summary>
-            测试http请求 WebApiClient Get
-            </summary>
-            <returns></returns>
-        </member>
         <member name="M:Blog.Core.Controllers.ValuesController.FluentVaTest(Blog.Core.Filter.UserRegisterVo)">
             <summary>
             测试Fulent做参数校验
@@ -888,6 +878,18 @@
             <summary>
             通过此处的key格式为 xx:xx:x
             </summary>
+        </member>
+        <member name="M:Blog.Core.Controllers.ValuesController.GetSnowflakeId">
+            <summary>
+            获取雪花Id
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Controllers.ValuesController.TestCacheAsync">
+            <summary>
+            测试缓存
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Blog.Core.Controllers.WeChatCompanyController">
             <summary>
@@ -1321,6 +1323,11 @@
             缓存管理
             </summary>
         </member>
+        <member name="M:Blog.Core.Api.Controllers.Systems.CacheManageController.#ctor(Blog.Core.Common.Caches.Interface.ICaching)">
+            <summary>
+            缓存管理
+            </summary>
+        </member>
         <member name="M:Blog.Core.Api.Controllers.Systems.CacheManageController.Get">
             <summary>
             获取全部缓存
@@ -1515,29 +1522,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:Blog.Core.SwaggerHelper.CustomRouteAttribute">
-            <summary>
-            自定义路由 /api/{version}/[controler]/[action]
-            </summary>
-        </member>
-        <member name="P:Blog.Core.SwaggerHelper.CustomRouteAttribute.GroupName">
-            <summary>
-            分组名称,是来实现接口 IApiDescriptionGroupNameProvider
-            </summary>
-        </member>
-        <member name="M:Blog.Core.SwaggerHelper.CustomRouteAttribute.#ctor(System.String)">
-            <summary>
-            自定义路由构造函数，继承基类路由
-            </summary>
-            <param name="actionName"></param>
-        </member>
-        <member name="M:Blog.Core.SwaggerHelper.CustomRouteAttribute.#ctor(Blog.Core.Extensions.CustomApiVersion.ApiVersions,System.String)">
-            <summary>
-            自定义版本+路由构造函数，继承基类路由
-            </summary>
-            <param name="actionName"></param>
-            <param name="version"></param>
-        </member>
         <member name="T:Blog.Core.Filter.GlobalRouteAuthorizeConvention">
             <summary>
             Summary:全局路由权限公约
@@ -1578,6 +1562,29 @@
             <summary>
             全局路由前缀公约
             </summary>
+        </member>
+        <member name="T:Blog.Core.SwaggerHelper.CustomRouteAttribute">
+            <summary>
+            自定义路由 /api/{version}/[controler]/[action]
+            </summary>
+        </member>
+        <member name="P:Blog.Core.SwaggerHelper.CustomRouteAttribute.GroupName">
+            <summary>
+            分组名称,是来实现接口 IApiDescriptionGroupNameProvider
+            </summary>
+        </member>
+        <member name="M:Blog.Core.SwaggerHelper.CustomRouteAttribute.#ctor(System.String)">
+            <summary>
+            自定义路由构造函数，继承基类路由
+            </summary>
+            <param name="actionName"></param>
+        </member>
+        <member name="M:Blog.Core.SwaggerHelper.CustomRouteAttribute.#ctor(Blog.Core.Extensions.CustomApiVersion.ApiVersions,System.String)">
+            <summary>
+            自定义版本+路由构造函数，继承基类路由
+            </summary>
+            <param name="actionName"></param>
+            <param name="version"></param>
         </member>
     </members>
 </doc>

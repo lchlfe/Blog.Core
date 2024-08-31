@@ -149,14 +149,14 @@ namespace Blog.Core.AuthHelper
 
                             if (user.IsDeleted)
                             {
-                                _user.MessageModel = new ApiResponse(StatusCode.CODE401, "用户已被删除,禁止登陆!").MessageModel;
+                                _user.MessageModel = new ApiResponse(StatusCode.CODE401, "用户已被删除,禁止登录!").MessageModel;
                                 context.Fail(new AuthorizationFailureReason(this, _user.MessageModel.msg));
                                 return;
                             }
 
                             if (!user.Enable)
                             {
-                                _user.MessageModel = new ApiResponse(StatusCode.CODE401, "用户已被禁用!禁止登陆!").MessageModel;
+                                _user.MessageModel = new ApiResponse(StatusCode.CODE401, "用户已被禁用!禁止登录!").MessageModel;
                                 context.Fail(new AuthorizationFailureReason(this, _user.MessageModel.msg));
                                 return;
                             }
@@ -208,19 +208,13 @@ namespace Blog.Core.AuthHelper
 
                         // 获取当前用户的角色信息
                         var currentUserRoles = new List<string>();
-                        // ids4和jwt切换
-                        // ids4
-                        if (Permissions.IsUseIds4)
+                        currentUserRoles = (from item in httpContext.User.Claims
+                                            where item.Type == ClaimTypes.Role
+                                            select item.Value).ToList();
+                        if (!currentUserRoles.Any())
                         {
                             currentUserRoles = (from item in httpContext.User.Claims
                                                 where item.Type == "role"
-                                                select item.Value).ToList();
-                        }
-                        else
-                        {
-                            // jwt
-                            currentUserRoles = (from item in httpContext.User.Claims
-                                                where item.Type == requirement.ClaimType
                                                 select item.Value).ToList();
                         }
 

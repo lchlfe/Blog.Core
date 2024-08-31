@@ -1,12 +1,10 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Autofac.Extras.DynamicProxy;
-using AutoMapper;
 using Blog.Core.AuthHelper;
 using Blog.Core.Common;
 using Blog.Core.Common.AppConfig;
 using Blog.Core.Common.DB;
-using Blog.Core.Common.LogHelper;
 using Blog.Core.Common.Seed;
 using Blog.Core.Extensions;
 using Blog.Core.IRepository.Base;
@@ -17,12 +15,11 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using Blog.Core.Common.Core;
+using Blog.Core.Extensions.ServiceExtensions;
 using Microsoft.Extensions.Logging;
 
 namespace Blog.Core.Tests
@@ -56,7 +53,11 @@ namespace Blog.Core.Tests
             var basePath = AppContext.BaseDirectory;
 
             IServiceCollection services = new ServiceCollection();
-            services.AddAutoMapper(typeof(Startup));
+            services.ConfigureApplication();
+
+            services.AddLogging();
+            services.AddAutoMapperSetup();
+            services.AddCacheSetup();
 
             services.AddSingleton(new AppSettings(basePath));
             services.AddScoped<DBSeed>();
@@ -104,11 +105,11 @@ namespace Blog.Core.Tests
             var builder = new ContainerBuilder();
             //builder.RegisterType<AdvertisementServices>().As<IAdvertisementServices>();
             builder.RegisterInstance(new LoggerFactory())
-                .As<ILoggerFactory>();
+               .As<ILoggerFactory>();
 
             builder.RegisterGeneric(typeof(Logger<>))
-                .As(typeof(ILogger<>))
-                .SingleInstance();
+               .As(typeof(ILogger<>))
+               .SingleInstance();
             //指定已扫描程序集中的类型注册为提供所有其实现的接口。
 
             builder.RegisterGeneric(typeof(BaseRepository<>)).As(typeof(IBaseRepository<>)).InstancePerDependency();           //注册仓储
@@ -116,22 +117,22 @@ namespace Blog.Core.Tests
 
             // 属性注入
             var controllerBaseType = typeof(ControllerBase);
-            builder.RegisterAssemblyTypes(typeof(Startup).Assembly)
-                .Where(t => controllerBaseType.IsAssignableFrom(t) && t != controllerBaseType)
-                .PropertiesAutowired();
+            //builder.RegisterAssemblyTypes(typeof(Program).Assembly)
+            //    .Where(t => controllerBaseType.IsAssignableFrom(t) && t != controllerBaseType)
+            //    .PropertiesAutowired();
 
             var servicesDllFile = Path.Combine(basePath, "Blog.Core.Services.dll");
             var assemblysServices = Assembly.LoadFrom(servicesDllFile);
             builder.RegisterAssemblyTypes(assemblysServices)
-                .AsImplementedInterfaces()
-                .InstancePerLifetimeScope()
-                .PropertiesAutowired()
-                .EnableInterfaceInterceptors();
+               .AsImplementedInterfaces()
+               .InstancePerLifetimeScope()
+               .PropertiesAutowired()
+               .EnableInterfaceInterceptors();
 
             var repositoryDllFile = Path.Combine(basePath, "Blog.Core.Repository.dll");
             var assemblysRepository = Assembly.LoadFrom(repositoryDllFile);
             builder.RegisterAssemblyTypes(assemblysRepository)
-                .PropertiesAutowired().AsImplementedInterfaces();
+               .PropertiesAutowired().AsImplementedInterfaces();
 
             services.Replace(ServiceDescriptor.Transient<IControllerActivator, ServiceBasedControllerActivator>());
 
@@ -141,9 +142,18 @@ namespace Blog.Core.Tests
             builder.Populate(services);
 
             //使用已进行的组件登记创建新容器
-            var ApplicationContainer = builder.Build();
+            var applicationContainer = builder.Build();
+            return applicationContainer;
+        }
 
-            return ApplicationContainer;
+        public IServiceProvider Build()
+        {
+            var container = DICollections();
+            var serviceProvider = new AutofacServiceProvider(container);
+            serviceProvider.ConfigureApplication();
+            App.IsBuild = true;
+            App.IsRun = true;
+            return serviceProvider;
         }
     }
 }
