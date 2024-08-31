@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Blog.Core.Controllers
 {
-	//测试
+	
 
 	public class BaseApiController : Controller
 	{
