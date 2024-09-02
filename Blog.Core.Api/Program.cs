@@ -22,7 +22,10 @@ using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using ReZero;
+using ReZero.SuperAPI;
 using Serilog;
+using SqlSugar;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Text;
@@ -123,6 +126,29 @@ builder.Services.AddEventBusSetup();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.Replace(ServiceDescriptor.Transient<IControllerActivator, ServiceBasedControllerActivator>());
+//超级API
+builder.Services.AddReZeroServices(api =>
+{
+
+    var apiObj = new SuperAPIOptions();
+
+    //Swagger地址
+    apiObj.UiOptions.DefaultIndexSource = "/index.html";
+
+    apiObj.DatabaseOptions = new DatabaseOptions()
+    {
+        ConnectionConfig = new SuperAPIConnectionConfig()
+        {
+            ConnectionString = "server=localhost;Database=health;Uid=root;Pwd=chao411123;Port=3306;Allow User Variables=True;",
+            DbType = DbType.MySql
+        }
+    };
+
+    //启用超级API
+    api.EnableSuperApi(apiObj);
+
+});
+
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 // 3、配置中间件

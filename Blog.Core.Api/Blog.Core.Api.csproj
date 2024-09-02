@@ -65,6 +65,7 @@
     <PackageReference Include="log4mongo-netcore" Version="3.2.0" />
     <PackageReference Include="MicroKnights.Log4NetAdoNetAppender" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+    <PackageReference Include="Rezero.Api" Version="1.7.9" />
     <PackageReference Include="SkyAPM.Agent.AspNetCore" Version="2.1.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
 	<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
