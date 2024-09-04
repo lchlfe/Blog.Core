@@ -31,7 +31,7 @@ namespace Blog.Core.Extensions
             // 然后这么写 [Authorize(Policy = "Admin")]
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Client", policy => policy.RequireRole("Client").Build());
+                options.AddPolicy("Client", policy => policy.RequireClaim("iss", "Blog.Core").Build());
                 options.AddPolicy("Admin", policy => policy.RequireRole("Admin").Build());
                 options.AddPolicy("SystemOrAdmin", policy => policy.RequireRole("Admin", "System"));
                 options.AddPolicy("A_S_O", policy => policy.RequireRole("Admin", "System", "Others"));

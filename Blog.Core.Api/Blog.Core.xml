@@ -1522,6 +1522,24 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:Blog.Core.Api.Controllers.Test.JwtTestController.GetAuthorize">
+            <summary>
+            测试token,特性Authorize
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Api.Controllers.Test.JwtTestController.GetTokenByRole">
+            <summary>
+            测试token，多角色特性[Authorize(Roles = "Admin,System11,Others")]
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Blog.Core.Api.Controllers.Test.JwtTestController.GetTokenByClient">
+            <summary>
+            测试token,特性 [Authorize(Policy = "GetTokenByClient")]
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Blog.Core.Filter.GlobalRouteAuthorizeConvention">
             <summary>
             Summary:全局路由权限公约

@@ -12,7 +12,7 @@ namespace Blog.Core.Api.Controllers.Tenant;
 /// </summary>
 [Produces("application/json")]
 [Route("api/TenantManager")]
-[Authorize]
+[Authorize(Permissions.Name)]
 public class TenantManagerController : BaseApiController
 {
     private readonly ITenantService _services;

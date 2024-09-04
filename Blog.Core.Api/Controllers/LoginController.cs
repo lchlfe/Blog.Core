@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Blog.Core.Common.Swagger;
+using Blog.Core.Model.Models;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 
 namespace Blog.Core.Controllers
@@ -50,6 +52,45 @@ namespace Blog.Core.Controllers
             _logger = logger;
         }
 
+        #region 测试token
+        [HttpGet]
+        [Route("GetTokenByName")]
+        public string GetTokenByName(string name)
+        {
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, name),
+                    new Claim(JwtRegisteredClaimNames.Jti, "1"),
+
+                    new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.DateToTimeStamp()),
+                    new Claim(ClaimTypes.Expiration,
+                        DateTime.Now.AddSeconds(_requirement.Expiration.TotalSeconds).ToString())
+                };
+            //claims.AddRange(userRoles.Split(',').Select(s => new Claim(ClaimTypes.Role, s)));
+            var token = JwtToken.BuildJwtToken(claims.ToArray(), _requirement);
+            return token.token;
+        }
+
+        [HttpGet]
+        [Route("GetTokenByRole")]
+        public string GetTokenByRole(string name,string role)
+        {
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, name),
+                    new Claim(JwtRegisteredClaimNames.Jti, "1"),
+
+                    new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.DateToTimeStamp()),
+                    new Claim(ClaimTypes.Expiration,
+                        DateTime.Now.AddSeconds(_requirement.Expiration.TotalSeconds).ToString())
+                };
+            var userRoles = role;
+            claims.AddRange(userRoles.Split(',').Select(s => new Claim(ClaimTypes.Role, s)));
+            var token = JwtToken.BuildJwtToken(claims.ToArray(), _requirement);
+            return token.token;
+        }
+        #endregion
+
 
         #region 获取token的第1种方法
 
@@ -70,7 +111,7 @@ namespace Blog.Core.Controllers
             var user = await _sysUserInfoServices.GetUserRoleNameStr(name, MD5Helper.MD5Encrypt32(pass));
             if (user != null)
             {
-                TokenModelJwt tokenModel = new TokenModelJwt {Uid = 1, Role = user};
+                TokenModelJwt tokenModel = new TokenModelJwt { Uid = 1, Role = user };
 
                 jwtStr = JwtHelper.IssueJwt(tokenModel);
                 suc = true;
@@ -121,7 +162,7 @@ namespace Blog.Core.Controllers
 
             var result = new
             {
-                data = new {success = suc, token = jwtStr}
+                data = new { success = suc, token = jwtStr }
             };
 
             return new MessageModel<string>()
@@ -305,7 +346,7 @@ namespace Blog.Core.Controllers
         {
             if (loginRequest is null)
             {
-                return new {result = false};
+                return new { result = false };
             }
 
             try
@@ -315,7 +356,7 @@ namespace Blog.Core.Controllers
                 {
                     HttpContext.SuccessSwagger();
                     HttpContext.SuccessSwaggerJwt(result.response.token);
-                    return new {result = true};
+                    return new { result = true };
                 }
             }
             catch (Exception ex)
@@ -323,7 +364,7 @@ namespace Blog.Core.Controllers
                 _logger.LogWarning(ex, "Swagger登录异常");
             }
 
-            return new {result = false};
+            return new { result = false };
         }
 
         /// <summary>
@@ -334,7 +375,7 @@ namespace Blog.Core.Controllers
         [Route("wxLogin")]
         public dynamic WxLogin(string g = "", string token = "")
         {
-            return new {g, token};
+            return new { g, token };
         }
     }
 

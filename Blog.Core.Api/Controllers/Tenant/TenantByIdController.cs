@@ -13,7 +13,7 @@ namespace Blog.Core.Api.Controllers.Tenant;
 /// </summary>
 [Produces("application/json")]
 [Route("api/Tenant/ById")]
-[Authorize]
+[Authorize(Permissions.Name)]
 public class TenantByIdController : BaseApiController
 {
     private readonly IBaseServices<BusinessTable> _services;

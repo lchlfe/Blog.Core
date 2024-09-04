@@ -32,7 +32,9 @@ public class DynamicCodeFirstController : BaseApiController
     private Type GetDynamicType()
     {
         return _db.DynamicBuilder().CreateClass("DynamicTestTable")
-            //{table} 占位符会自动替换成表名
+              //{table} 占位符会自动替换成表名
+              .CreateIndex(new SugarIndexAttribute("idx_{table}_Code", "Code", OrderByType.Desc))
+
             .CreateIndex(new SugarIndexAttribute("idx_{table}_Code", "Code", OrderByType.Desc))
             .CreateProperty("Id", typeof(int), new SugarColumn() {IsPrimaryKey = true, IsIdentity = true})
             .CreateProperty("Code", typeof(string), new SugarColumn() {Length = 50})
