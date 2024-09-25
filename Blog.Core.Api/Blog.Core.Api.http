@@ -1,0 +1,4 @@
+﻿@Url=http://localhost:9291
+
+GET {{Url}}/api/Values/Test_Aop_Cache
+Accept: application/json

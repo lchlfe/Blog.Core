@@ -46,4 +46,10 @@ public class JwtTestController : BaseApiController
         return "GetTokenByClient";
     }
 
+    [HttpGet]
+    [AllowAnonymous]
+    public string GetNumber()
+    {
+        return "open";
+    }
 }
