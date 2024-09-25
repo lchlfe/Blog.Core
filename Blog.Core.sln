@@ -31,11 +31,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		Blog.Core.Publish.Linux.sh = Blog.Core.Publish.Linux.sh
 		codecov.yml = codecov.yml
 		CreateYourProject.bat = CreateYourProject.bat
+		Directory.Build.props = Directory.Build.props
 		DockerBuild.bat = DockerBuild.bat
 		Dockerfile = Dockerfile
 		nuget.config = nuget.config
 		README.md = README.md
-		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{EDA8901E-541E-4ADC-B71E-59697D5F9549}"
@@ -58,7 +58,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blog.Core.Serilog.Es", "Blo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ocelot.Provider.Nacos", "Ocelot.Provider.Nacos\Ocelot.Provider.Nacos.csproj", "{6463FB13-5F01-4A1D-8B62-A454FB3812EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blog.Core.Serilog", "Blog.Core.Serilog\Blog.Core.Serilog.csproj", "{7F9057F0-ED8D-4694-B590-7D75C012DF00}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blog.Core.Serilog", "Blog.Core.Serilog\Blog.Core.Serilog.csproj", "{7F9057F0-ED8D-4694-B590-7D75C012DF00}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0通用", "0通用", "{9533A2AC-7F78-4AC2-A1B9-F0A435072374}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rf.Common", "Rf.Common\Rf.Common.csproj", "{8166FE79-200F-42BC-AF09-D411298C4116}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rf.Repository", "Rf.Repository\Rf.Repository.csproj", "{2FE5D0CF-881D-4FD7-B2A6-9B755A0A3F1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -126,6 +132,14 @@ Global
 		{7F9057F0-ED8D-4694-B590-7D75C012DF00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F9057F0-ED8D-4694-B590-7D75C012DF00}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F9057F0-ED8D-4694-B590-7D75C012DF00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8166FE79-200F-42BC-AF09-D411298C4116}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8166FE79-200F-42BC-AF09-D411298C4116}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8166FE79-200F-42BC-AF09-D411298C4116}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8166FE79-200F-42BC-AF09-D411298C4116}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FE5D0CF-881D-4FD7-B2A6-9B755A0A3F1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FE5D0CF-881D-4FD7-B2A6-9B755A0A3F1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FE5D0CF-881D-4FD7-B2A6-9B755A0A3F1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FE5D0CF-881D-4FD7-B2A6-9B755A0A3F1F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -136,6 +150,8 @@ Global
 		{17C9E9DC-E926-4C90-9025-3DAC55D7EDA3} = {A592C96A-4E44-4F2A-AC21-30683AF6C493}
 		{A11C0DF2-1E13-4EED-BA49-44A57136B189} = {E2BD7D4D-9ED5-41CD-8401-C3FB26F203BB}
 		{6463FB13-5F01-4A1D-8B62-A454FB3812EB} = {E2BD7D4D-9ED5-41CD-8401-C3FB26F203BB}
+		{8166FE79-200F-42BC-AF09-D411298C4116} = {9533A2AC-7F78-4AC2-A1B9-F0A435072374}
+		{2FE5D0CF-881D-4FD7-B2A6-9B755A0A3F1F} = {9533A2AC-7F78-4AC2-A1B9-F0A435072374}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AB40D0C5-E3EA-4A9B-86C2-38F0BB33FC04}
