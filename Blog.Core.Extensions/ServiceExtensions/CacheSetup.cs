@@ -8,6 +8,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Serilog;
 using StackExchange.Redis;
 
 namespace Blog.Core.Extensions.ServiceExtensions;
@@ -35,7 +36,8 @@ public static class CacheSetup
             //使用Redis
             services.AddStackExchangeRedisCache(options =>
             {
-                options.ConnectionMultiplexerFactory = () => Task.FromResult(App.GetService<IConnectionMultiplexer>(false));
+                options.ConnectionMultiplexerFactory =
+                    () => Task.FromResult(App.GetService<IConnectionMultiplexer>(false));
                 if (!cacheOptions.InstanceName.IsNullOrEmpty()) options.InstanceName = cacheOptions.InstanceName;
             });
 
